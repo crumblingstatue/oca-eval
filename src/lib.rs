@@ -134,7 +134,7 @@ impl RawScores {
     pub fn raw_score_for_category(&self, category: Category) -> RawScoreForCategory {
         let categ_questions = CATEGORY_MAP[category as usize];
         let mut total = 0;
-        for &index in categ_questions.iter() {
+        for &index in &categ_questions {
             total += self.0[index as usize];
         }
         RawScoreForCategory {
