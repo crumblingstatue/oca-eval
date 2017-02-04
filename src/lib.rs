@@ -1,4 +1,32 @@
+//! Library for evaluating
+//! [OCA](https://en.wikipedia.org/wiki/Oxford_Capacity_Analysis) personality tests.
+//!
+//! ```
+//! use oca_eval::{Answer, NormGroup, Category};
+//!
+//! // First, we need the answers of course.
+//! // Looks like this person is very uncertain.
+//! // That, or they're just messing around.
+//! let answers = [Answer::Maybe; 200];
+//!
+//! let raw = oca_eval::eval_raw(&answers);
+//! // Let's see how "happy" our customer is.
+//! let raw_happiness = raw.raw_score_for_category(Category::B);
+//! assert_eq!(raw_happiness.value(), 83);
+//! // Hmm. The above doesn't tell us much.
+//! // We want the "final" score that we would see on the OCA graph.
+//!
+//! // In order to get the final score, we need to weigh the raw score
+//! // against the "norm" of the age/gender group our customer belongs to.
+//! // There are different norms for young/adult males/females.
+//! // Let's say that our customer is an adult male.
+//! // Now let's get that happiness score!
+//! assert_eq!(raw_happiness.weigh(NormGroup::AdultMale), -93);
+//! // Well... That doesn't look good. You should try some of our courses.
+//! ```
+
 #![feature(pub_restricted)]
+#![warn(missing_docs)]
 
 mod data {
     pub mod question_scorings;
@@ -30,16 +58,62 @@ const N_CATEGORIES: usize = 10;
 const QUESTIONS_PER_CATEGORY: usize = 20;
 const N_QUESTIONS: usize = N_CATEGORIES * QUESTIONS_PER_CATEGORY;
 
+/// An answer to an OCA question.
 #[derive(Clone, Copy)]
+#[allow(missing_docs)]
 pub enum Answer {
     Yes,
     Maybe,
     No,
 }
 
-pub struct RawScores([u8; N_QUESTIONS]);
+/// A category that measures a certain aspect of personality.
+#[derive(Clone, Copy)]
+pub enum Category {
+    /// Stable / unstable
+    A = 0,
+    /// Happy / depressed
+    B = 1,
+    /// Composed / nervous
+    C = 2,
+    /// Certainty / uncertainty
+    D = 3,
+    /// Active / inactive
+    E = 4,
+    /// Aggressive / inhibited
+    F = 5,
+    /// Responsible / irresponsible
+    G = 6,
+    /// Correct estimation / critical
+    H = 7,
+    /// Appreciative / lack of accord
+    I = 8,
+    /// Comm level / withdrawn
+    J = 9,
+}
 
-// Evaluates raw scores for each question
+impl Category {
+    /// Creates a new `Category` from an index, in the order of categories (0-9).
+    pub fn from_index(index: u8) -> Option<Self> {
+        use Category::*;
+
+        Some(match index {
+            0 => A,
+            1 => B,
+            2 => C,
+            3 => D,
+            4 => E,
+            5 => F,
+            6 => G,
+            7 => H,
+            8 => I,
+            9 => J,
+            _ => return None,
+        })
+    }
+}
+
+/// Evaluates the raw scores for all the answers.
 pub fn eval_raw(answers: &[Answer; N_QUESTIONS]) -> RawScores {
     let mut scores = [0; N_QUESTIONS];
     for i in 0..N_QUESTIONS {
@@ -50,36 +124,59 @@ pub fn eval_raw(answers: &[Answer; N_QUESTIONS]) -> RawScores {
     RawScores(scores)
 }
 
-pub struct RawScore(u8);
-
-impl RawScore {
-    pub fn weigh(&self, group: WeighGroup, category: u8) -> i8 {
-        let group_array = match group {
-            WeighGroup::Boy => WEIGHT_BOY,
-            WeighGroup::Girl => WEIGHT_GIRL,
-            WeighGroup::AdultMale => WEIGHT_ADULT_MALE,
-            WeighGroup::AdultFemale => WEIGHT_ADULT_FEMALE,
-        };
-        let categ_array = group_array[category as usize];
-        categ_array[(self.0 - 37) as usize]
-    }
-}
+/// The raw scores for the questions.
+///
+/// This is not the final score that would appear on the graph.
+pub struct RawScores(pub [u8; N_QUESTIONS]);
 
 impl RawScores {
-    pub fn raw_score_for_category(&self, category: u8) -> RawScore {
+    /// Gets the raw score for a specific category.
+    pub fn raw_score_for_category(&self, category: Category) -> RawScoreForCategory {
         let categ_questions = CATEGORY_MAP[category as usize];
         let mut total = 0;
         for &index in categ_questions.iter() {
             total += self.0[index as usize];
         }
-        RawScore(total)
+        RawScoreForCategory {
+            value: total,
+            category: category,
+        }
     }
 }
 
-pub enum WeighGroup {
-    Boy,
+/// The raw score for a specific category.
+pub struct RawScoreForCategory {
+    value: u8,
+    category: Category,
+}
+
+impl RawScoreForCategory {
+    /// Weighs this score against a norm group to get the final score that will appear in the graph.
+    pub fn weigh(&self, group: NormGroup) -> i8 {
+        let group_array = match group {
+            NormGroup::YoungMale => WEIGHT_BOY,
+            NormGroup::YoungFemale => WEIGHT_GIRL,
+            NormGroup::AdultMale => WEIGHT_ADULT_MALE,
+            NormGroup::AdultFemale => WEIGHT_ADULT_FEMALE,
+        };
+        let categ_array = group_array[self.category as usize];
+        categ_array[(self.value - 37) as usize]
+    }
+    /// Returns the raw value of this score.
+    pub fn value(&self) -> u8 {
+        self.value
+    }
+}
+
+/// An age/gender group for which there is a "norm".
+pub enum NormGroup {
+    /// Male, 14-18 years old.
+    YoungMale,
+    /// Male, 18+.
     AdultMale,
-    Girl,
+    /// Female, 14-18 years old.
+    YoungFemale,
+    /// Female, 18+.
     AdultFemale,
 }
 
