@@ -25,7 +25,7 @@
 //! // Well... That doesn't look good. You should try some of our courses.
 //! ```
 
-#![feature(pub_restricted)]
+#![feature(pub_restricted, conservative_impl_trait)]
 #![warn(missing_docs)]
 
 mod data {
@@ -110,6 +110,31 @@ impl Category {
             9 => J,
             _ => return None,
         })
+    }
+    /// Iterates over all categories in order.
+    pub fn iter() -> impl Iterator<Item = Category> + 'static {
+        use Category::*;
+
+        static CATEGS: [Category; 10] = [A, B, C, D, E, F, G, H, I, J];
+
+        CATEGS.into_iter().cloned()
+    }
+    /// Returns the letter of this category.
+    pub fn letter(self) -> char {
+        use Category::*;
+
+        match self {
+            A => 'A',
+            B => 'B',
+            C => 'C',
+            D => 'D',
+            E => 'E',
+            F => 'F',
+            G => 'G',
+            H => 'H',
+            I => 'I',
+            J => 'J',
+        }
     }
 }
 
