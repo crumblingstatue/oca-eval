@@ -17,7 +17,7 @@
 //! // We want the "final" score that we would see on the OCA graph.
 //!
 //! // In order to get the final score, we need to weigh the raw score
-//! // against the "norm" of the age/gender group our customer belongs to.
+//! // against the "norm" of the age/sex group our customer belongs to.
 //! // There are different norms for young/adult males/females.
 //! // Let's say that our customer is an adult male.
 //! // Now let's get that happiness score!
@@ -168,7 +168,7 @@ impl RawScoreForCategory {
     }
 }
 
-/// An age/gender group for which there is a "norm".
+/// An age/sex group for which there is a "norm".
 pub enum NormGroup {
     /// Male, 14-18 years old.
     YoungMale,
