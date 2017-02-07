@@ -180,6 +180,38 @@ pub enum NormGroup {
     AdultFemale,
 }
 
+impl NormGroup {
+    /// Constructs a `NormGroup` from an age and sex.
+    ///
+    /// Returns `None` if age is less than 14.
+    pub fn from_age_and_sex(age: u8, sex: Sex) -> Option<Self> {
+        match sex {
+            Sex::Male => {
+                match age {
+                    14...17 => Some(NormGroup::YoungMale),
+                    18...255 => Some(NormGroup::AdultMale),
+                    _ => None,
+                }
+            }
+            Sex::Female => {
+                match age {
+                    14...17 => Some(NormGroup::YoungFemale),
+                    18...255 => Some(NormGroup::AdultFemale),
+                    _ => None,
+                }
+            }
+        }
+    }
+}
+
+/// The two sexes that a norm group can have.
+#[allow(missing_docs)]
+#[derive(Clone, Copy)]
+pub enum Sex {
+    Male,
+    Female,
+}
+
 #[cfg(test)]
 mod tests;
 
