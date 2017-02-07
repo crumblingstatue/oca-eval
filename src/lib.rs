@@ -194,6 +194,7 @@ impl RawScoreForCategory {
 }
 
 /// An age/sex group for which there is a "norm".
+#[derive(Clone, Copy)]
 pub enum NormGroup {
     /// Male, 14-18 years old.
     YoungMale,
