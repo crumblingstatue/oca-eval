@@ -25,7 +25,7 @@
 //! // Well... That doesn't look good. You should try some of our courses.
 //! ```
 
-#![feature(pub_restricted, conservative_impl_trait)]
+#![feature(conservative_impl_trait)]
 #![warn(missing_docs)]
 
 mod data {
