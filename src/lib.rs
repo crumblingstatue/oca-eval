@@ -112,7 +112,7 @@ impl Category {
         })
     }
     /// Iterates over all categories in order.
-    pub fn iter() -> impl Iterator<Item = Category> + 'static {
+    pub fn iter() -> impl Iterator<Item = Category> {
         use Category::*;
 
         static CATEGS: [Category; 10] = [A, B, C, D, E, F, G, H, I, J];
