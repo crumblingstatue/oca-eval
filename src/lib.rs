@@ -114,10 +114,7 @@ impl Category {
     /// Iterates over all categories in order.
     pub fn iter() -> impl Iterator<Item = Category> {
         use Category::*;
-
-        static CATEGS: [Category; 10] = [A, B, C, D, E, F, G, H, I, J];
-
-        CATEGS.into_iter().cloned()
+        [A, B, C, D, E, F, G, H, I, J].into_iter().cloned()
     }
     /// Returns the letter of this category.
     pub fn letter(self) -> char {
