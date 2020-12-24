@@ -1,10 +1,16 @@
-use super::*;
 use super::NormGroup::*;
+use super::*;
 
 macro_rules! test_answer {
-    (0) => { Answer::Yes };
-    (1) => { Answer::Maybe };
-    (2) => { Answer::No };
+    (0) => {
+        Answer::Yes
+    };
+    (1) => {
+        Answer::Maybe
+    };
+    (2) => {
+        Answer::No
+    };
 }
 
 macro_rules! test_answers {

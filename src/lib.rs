@@ -25,18 +25,17 @@
 //! // Well... That doesn't look good. You should try some of our courses.
 //! ```
 
-#![feature(conservative_impl_trait)]
 #![warn(missing_docs)]
 
 mod data {
+    pub mod category_map;
     pub mod question_scorings;
     pub mod weights;
-    pub mod category_map;
 }
 
+use data::category_map::CATEGORY_MAP;
 use data::question_scorings::QUESTION_SCORINGS;
 use data::weights::*;
-use data::category_map::CATEGORY_MAP;
 
 struct QuestionScoring {
     yes: u8,
@@ -114,7 +113,7 @@ impl Category {
     /// Iterates over all categories in order.
     pub fn iter() -> impl Iterator<Item = Category> {
         use Category::*;
-        [A, B, C, D, E, F, G, H, I, J].into_iter().cloned()
+        [A, B, C, D, E, F, G, H, I, J].iter().cloned()
     }
     /// Returns the letter of this category.
     pub fn letter(self) -> char {
@@ -161,7 +160,7 @@ impl RawScores {
         }
         RawScoreForCategory {
             value: total,
-            category: category,
+            category,
         }
     }
 }
@@ -210,13 +209,13 @@ impl NormGroup {
     pub fn from_age_and_sex(age: u8, sex: Sex) -> Option<Self> {
         match sex {
             Sex::Male => match age {
-                14...17 => Some(NormGroup::YoungMale),
-                18...255 => Some(NormGroup::AdultMale),
+                14..=17 => Some(NormGroup::YoungMale),
+                18..=255 => Some(NormGroup::AdultMale),
                 _ => None,
             },
             Sex::Female => match age {
-                14...17 => Some(NormGroup::YoungFemale),
-                18...255 => Some(NormGroup::AdultFemale),
+                14..=17 => Some(NormGroup::YoungFemale),
+                18..=255 => Some(NormGroup::AdultFemale),
                 _ => None,
             },
         }
